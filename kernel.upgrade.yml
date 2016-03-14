@@ -1,0 +1,23 @@
+---
+- hosts: reboot     # Set group here
+  max_fail_percentage: 10
+  serial: 15
+  remote_user: root
+  vars:
+    version: 3.18.25-28
+  tasks:
+  - name: upgrade kernel
+    apt:
+      name={{ item }}={{ version }} state=present
+    with_items:
+    - linux-tools
+    - linux-image-server
+    - linux-image-{{version}}-dbgsym
+  - name: run rolling reboot
+    command: shutdown -r now "Ansible rolling reboot"
+
+  - name: wait for server to come back
+    local_action: wait_for host={{ inventory_hostname }} port=22 state=started delay=120 timeout=600
+
+  - name: pausing
+    pause: seconds=10
