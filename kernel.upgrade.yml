@@ -1,5 +1,5 @@
 ---
-- hosts: reboot     # Set group here
+- hosts: reboot-myt     # Set group here
   max_fail_percentage: 10
   serial: 15
   remote_user: root
@@ -8,16 +8,19 @@
   tasks:
   - name: upgrade kernel
     apt:
-      name={{ item }}={{ version }} state=present
+      name={{ item }}={{ version }} state=present update_cache=yes
     with_items:
     - linux-tools
     - linux-image-server
-    - linux-image-{{version}}-dbgsym
+    - linux-image-{{ version }}-dbgsym
+    when: ansible_kernel != "{{ version }}"
+    register: apt_runed
+
   - name: run rolling reboot
     command: shutdown -r now "Ansible rolling reboot"
+    when: ansible_kernel != "{{ version }}"
+    register: rolling_reboot
 
   - name: wait for server to come back
     local_action: wait_for host={{ inventory_hostname }} port=22 state=started delay=120 timeout=600
-
-  - name: pausing
-    pause: seconds=10
+    when: rolling_reboot.changed
