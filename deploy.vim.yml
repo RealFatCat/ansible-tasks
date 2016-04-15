@@ -1,0 +1,15 @@
+---
+- hosts: all
+  tasks:
+  - name: whoami
+    local_action: command whoami
+    register: whoami
+
+  - name: git clone vim-config
+    git:
+      repo: git@github.com:RealFatCat/vim-config.git
+      dest: /home/{{whoami.stdout}}/git/vim-config
+      accept_hostkey: True
+
+  - name: install vim environment
+    shell: git/vim-config/install-vim-env.bash >> /var/tmp/vim-env-install.log
