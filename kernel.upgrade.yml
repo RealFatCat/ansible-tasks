@@ -1,5 +1,5 @@
 ---
-- hosts: reboot-myt     # Set group here
+- hosts: all     # Set group here
   max_fail_percentage: 10
   serial: 15
   remote_user: root
@@ -22,5 +22,5 @@
     register: rolling_reboot
 
   - name: wait for server to come back
-    local_action: wait_for host={{ inventory_hostname }} port=22 state=started delay=120 timeout=600
+    local_action: wait_for host={{ inventory_hostname }} port=22 state=started delay=5 timeout=600
     when: rolling_reboot.changed
